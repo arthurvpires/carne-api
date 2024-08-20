@@ -10,8 +10,7 @@ use App\Http\Controllers\Controller;
 
 class CarneController extends Controller
 {
-
-    public function criarCarne(Request $request)
+    public function create(Request $request)
     {
         $data = $request->validate([
             'valor_total' => 'required|numeric',
@@ -25,38 +24,23 @@ class CarneController extends Controller
         $qtdParcelas = $data['qtd_parcelas'];
         $dataPrimeiroVencimento = $data['data_primeiro_vencimento'];
         $periodicidade = $data['periodicidade'];
-        $valorEntrada = $data['valor_entrada'] ?? 0;
-        
-        $carne = Carne::create([
-            'valor_total' => $valorTotal,
-            'qtd_parcelas' => $qtdParcelas,
-            'data_primeiro_vencimento' => $dataPrimeiroVencimento,
-            'periodicidade' => $periodicidade,
-            'valor_entrada' => $valorEntrada
-        ]);
+        $valorEntrada = $data['valor_entrada'] ?? false;
+
+        $carne = $this->novoCarne($data);
 
         $valorRestante = $valorTotal - $valorEntrada;
         $valorParcela = round($valorRestante / $qtdParcelas, 2);
         $dataVencimento = new DateTime($dataPrimeiroVencimento);
-
-        if ($valorEntrada > 0) {
-            Parcela::create([
-                'carne_id' => $carne->id, 
-                'data_vencimento' => $dataPrimeiroVencimento,
-                'valor' => $valorEntrada,
-                'numero' => 0,
-                'entrada' => true
-            ]);
-        }
-
+        
         for ($i = 1; $i <= $qtdParcelas; $i++) {
             Parcela::create([
                 'carne_id' => $carne->id,
                 'data_vencimento' => $dataVencimento->format('Y-m-d'),
                 'valor' => $valorParcela,
                 'numero' => $i,
+                'entrada' => $valorEntrada > 0 ? true : false
             ]);
-
+            
             if ($periodicidade == Carne::PERIODICIDADE_MENSAL) {
                 $dataVencimento->modify('+1 month');
             } elseif ($periodicidade == Carne::PERIODICIDADE_SEMANAL) {
@@ -67,14 +51,25 @@ class CarneController extends Controller
         return response()->json([
             'total' => $valorTotal,
             'valor_entrada' => $valorEntrada,
-            'valor_parcelas' => $valorParcela,
-            'qtd_parcelas' => $qtdParcelas,
+            'parcelas' => $carne->parcelas,
         ]);
     }
 
-    public function recuperarParcelas($id)
+    public function recovery($id)
     {
         $carne = Carne::with('parcelas')->findOrFail($id);
         return response()->json($carne->parcelas);
     }
+
+    private function novoCarne(array $data): Carne
+    {
+        return Carne::create([
+            'valor_total' => $data['valor_total'],
+            'qtd_parcelas' => $data['qtd_parcelas'],
+            'data_primeiro_vencimento' => $data['data_primeiro_vencimento'],
+            'periodicidade' => $data['periodicidade'],
+            'valor_entrada' => $data['valor_entrada'] ?? false
+        ]);
+    }
+
 }

@@ -8,6 +8,6 @@ Route::middleware('api')->group(function () {
         return view('index');
     });
     
-    Route::post('/carne', [CarneController::class, 'criarCarne']);
-    Route::get('/carne/{id}', [CarneController::class, 'recuperarParcelas']);
+    Route::post('/carne', [CarneController::class, 'create']);
+    Route::get('/carne/{id}', [CarneController::class, 'recovery']);
 });
