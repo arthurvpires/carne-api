@@ -37,7 +37,6 @@
         </form>
     </section>
 
-
     <section>
         <h2>Cenário 2: Divisão de R$ 0,30 em 2 Parcelas com Entrada de R$ 0,10</h2>
         <form action="/api/carne" method="POST">
@@ -65,7 +64,6 @@
             <button type="submit">Criar Carnê</button>
         </form>
     </section>
-
 </div>
 </body>
 </html>

@@ -10,7 +10,6 @@ use App\Http\Controllers\Controller;
 
 class CarneController extends Controller
 {
-
     public function criarCarne(Request $request)
     {
         $data = $request->validate([

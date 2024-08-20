@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-
 use Tests\TestCase;
 
 class CarneTest extends TestCase
