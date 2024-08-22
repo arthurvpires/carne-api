@@ -5,28 +5,20 @@ namespace App\Http\Controllers;
 use DateTime;
 use App\Models\Carne;
 use App\Models\Parcela;
-use Illuminate\Http\Request;
+use App\Http\Requests\CarneRequest;
 use App\Http\Controllers\Controller;
 
 class CarneController extends Controller
 {
-    public function create(Request $request)
+    public function create(CarneRequest $req)
     {
-        $data = $request->validate([
-            'valor_total' => 'required|numeric',
-            'qtd_parcelas' => 'required|integer|min:1',
-            'data_primeiro_vencimento' => 'required|date',
-            'periodicidade' => 'required|in:mensal,semanal',
-            'valor_entrada' => 'nullable|numeric|min:0',
-        ]);
+        $valorTotal = $req['valor_total'];
+        $qtdParcelas = $req['qtd_parcelas'];
+        $dataPrimeiroVencimento = $req['data_primeiro_vencimento'];
+        $periodicidade = $req['periodicidade'];
+        $valorEntrada = $req['valor_entrada'] ?? false;
 
-        $valorTotal = $data['valor_total'];
-        $qtdParcelas = $data['qtd_parcelas'];
-        $dataPrimeiroVencimento = $data['data_primeiro_vencimento'];
-        $periodicidade = $data['periodicidade'];
-        $valorEntrada = $data['valor_entrada'] ?? false;
-
-        $carne = $this->novoCarne($data);
+        $carne = $this->novoCarne($req);
 
         $valorRestante = $valorTotal - $valorEntrada;
         $valorParcela = round($valorRestante / $qtdParcelas, 2);
@@ -61,7 +53,7 @@ class CarneController extends Controller
         return response()->json($carne->parcelas);
     }
 
-    private function novoCarne(array $data): Carne
+    private function novoCarne(CarneRequest $data): Carne
     {
         return Carne::create([
             'valor_total' => $data['valor_total'],
